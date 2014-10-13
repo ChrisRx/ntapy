@@ -1,0 +1,7 @@
+# Taps
+- in: eth0
+  out: eth2
+- in: eth1
+  out: eth2
+  filter:
+    port 8001

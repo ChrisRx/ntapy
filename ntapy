@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import sys
+import threading
+import yaml
+import ntapy
+
+def read_config(file):
+    try:
+        config = open(file).read()
+    except IOError:
+        sys.stderr.write("Could not open {0}\n".format(args.config))
+        sys.exit(0)
+    return [(tap.get('in'), tap.get('out'), tap.get('filter'))
+        for tap in yaml.load(config)]
+
+def main(args):
+    taps = read_config(args.config)
+    threads = []
+    for tap in taps:
+        threads.append(threading.Thread(target=ntapy.tap, args=tap))
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('config', action='store',
+        help="configuration file (YAML)")
+    args = parser.parse_args()
+    if not args.config:
+        sys.stderr.write("Needs config file\n")
+    main(args)
